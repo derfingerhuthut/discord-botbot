@@ -258,4 +258,4 @@ async def on_ready():
 
 
 # ── Run ────────────────────────────────────────────────────────────────────────
-bot.run("YOUR_BOT_TOKEN_HERE")
+bot.run(os.getenv("DISCORD_TOKEN"))
