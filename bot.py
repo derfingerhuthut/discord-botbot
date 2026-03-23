@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-import asyncio
 import os
+import asyncio
 
 # ── Bot Setup ──────────────────────────────────────────────────────────────────
 intents = discord.Intents.default()
@@ -68,7 +68,6 @@ GAMES = [
     {"title": "Noita", "genre": "Roguelike / Sandbox", "desc": "Every pixel is simulated. Magic wands, explosions, pure chaos."},
 ]
 
-
 # ── /fact ──────────────────────────────────────────────────────────────────────
 @bot.tree.command(name="fact", description="Get a random interesting fact!")
 async def fact(interaction: discord.Interaction):
@@ -80,7 +79,6 @@ async def fact(interaction: discord.Interaction):
     )
     await interaction.response.send_message(embed=embed)
 
-
 # ── /username ──────────────────────────────────────────────────────────────────
 @bot.tree.command(name="username", description="Generate a random cool username!")
 async def username(interaction: discord.Interaction):
@@ -88,11 +86,10 @@ async def username(interaction: discord.Interaction):
     embed = discord.Embed(
         title="🎮 Username Generator",
         description=f"How about: **`{name}`**?",
-        color=discord.Color.purple()
+        color=discord.Color.purple
     )
     embed.set_footer(text="Run /username again for a new one!")
     await interaction.response.send_message(embed=embed)
-
 
 # ── /game ──────────────────────────────────────────────────────────────────────
 @bot.tree.command(name="game", description="Get a random game recommendation!")
@@ -106,7 +103,6 @@ async def game(interaction: discord.Interaction):
     embed.add_field(name="Genre", value=pick["genre"], inline=True)
     embed.set_footer(text="Run /game again for another recommendation!")
     await interaction.response.send_message(embed=embed)
-
 
 # ── /dm ────────────────────────────────────────────────────────────────────────
 @bot.tree.command(name="dm", description="Send a DM to a server member.")
@@ -131,8 +127,7 @@ async def dm(interaction: discord.Interaction, member: discord.Member, message: 
             f"❌ Couldn't DM **{member.display_name}** — they may have DMs disabled.", ephemeral=True
         )
 
-
-# ── /tictactoe ─────────────────────────────────────────────────────────────────
+# ── TicTacToe Classes ─────────────────────────────────────────────────────────
 class TicTacToeButton(discord.ui.Button):
     def __init__(self, row: int, col: int):
         super().__init__(style=discord.ButtonStyle.secondary, label="\u200b", row=row)
@@ -192,7 +187,6 @@ class TicTacToeButton(discord.ui.Button):
             )
             await interaction.response.edit_message(embed=embed, view=view)
 
-
 class TicTacToeGame:
     def __init__(self, player_x: discord.Member, player_o: discord.Member):
         self.player_x = player_x
@@ -203,10 +197,10 @@ class TicTacToeGame:
     def check_winner(self):
         b = self.board
         lines = (
-            [b[r] for r in range(3)]          # rows
-            + [[b[r][c] for r in range(3)] for c in range(3)]  # cols
-            + [[b[0][0], b[1][1], b[2][2]]]   # diag
-            + [[b[0][2], b[1][1], b[2][0]]]   # anti-diag
+            [b[r] for r in range(3)]
+            + [[b[r][c] for r in range(3)] for c in range(3)]
+            + [[b[0][0], b[1][1], b[2][2]]]
+            + [[b[0][2], b[1][1], b[2][0]]]
         )
         for line in lines:
             if line[0] != " " and all(c == line[0] for c in line):
@@ -216,7 +210,6 @@ class TicTacToeGame:
     def is_draw(self):
         return all(cell != " " for row in self.board for cell in row)
 
-
 class TicTacToeView(discord.ui.View):
     def __init__(self, game: TicTacToeGame):
         super().__init__(timeout=300)
@@ -224,7 +217,6 @@ class TicTacToeView(discord.ui.View):
         for row in range(3):
             for col in range(3):
                 self.add_item(TicTacToeButton(row, col))
-
 
 @bot.tree.command(name="tictactoe", description="Challenge someone to a game of Tic Tac Toe!")
 @app_commands.describe(opponent="The member you want to challenge")
@@ -249,14 +241,22 @@ async def tictactoe(interaction: discord.Interaction, opponent: discord.Member):
     )
     await interaction.response.send_message(embed=embed, view=view)
 
-
 # ── Ready & Sync ───────────────────────────────────────────────────────────────
 @bot.event
 async def on_ready():
-    await bot.tree.sync()
-    print(f"✅ Logged in as {bot.user} (ID: {bot.user.id})")
-    print("Slash commands synced. Bot is ready!")
-
+    try:
+        await bot.tree.sync()
+        print(f"✅ Bot is ready and slash commands are synced! Logged in as {bot.user}")
+    except Exception as e:
+        print(f"⚠️ Error syncing commands: {e}")
 
 # ── Run ────────────────────────────────────────────────────────────────────────
-bot.run(os.getenv("DISCORD_TOKEN"))
+async def main():
+    token = os.getenv("DISCORD_TOKEN")
+    if not token:
+        print("❌ DISCORD_TOKEN not set!")
+        return
+    async with bot:
+        await bot.start(token)
+
+asyncio.run(main())
