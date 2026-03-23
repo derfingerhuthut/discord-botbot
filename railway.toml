@@ -1,0 +1,5 @@
+[build]
+builder = "railpack"
+
+[build.railpack]
+python = "3.12"
